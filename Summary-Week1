@@ -1,0 +1,153 @@
+# ÖZET
+Arkadaşlar merhaba;
+
+Bu hafta işlediğimiz derste maven konusunda değindik.
+Maven bir build automation tool(Build işini otomatik hale getirme)'u olarak kullanılmaktadır.
+Maven tüm konfigürasyonunu pom.xml(project Object Model) adını verdiğimiz bir dosyadan almaktadır. 
+
+Bir proje yaratırken maven project tipini seçerek maven projesi oluşturabilmekteyiz. Ve otomatik olarak bize default bir pom.xml dosyası gelmektedir.
+Maven default olarak 3 tane lifecycle ile gelmektedir.
+
+Default
+Clean
+Site
+
+Default lifecycle'i projeyi build etmek için, clean lifecycle'i önceki build dosyalarını silmek için kullanılmaktadır.
+Bu lifecycler çok güzel ayarlanmış fazlara(Phase)'lere sahiptir. Fazlara build aşamasındaki adımlar diyebiliriz.
+
+Default Lifecycle Phases (Full liste için bknz: https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html)
+process-resources
+compile
+process-test-resources
+test-compile
+test
+package
+install
+deploy
+
+Clean Lifecycle Phases
+pre-clean
+clean
+post-clean
+
+pom.xml dosyası xml formatındadır ve farklı tagler kullaranak tüm build sürecimizi otomatize edebilmekteyiz.
+
+<dependencies> tagi ile bağımlı oldugumuz kütüphanleri belirtebiliriz.
+  <dependencies>  
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>3.14</version>
+      <scope>compile</scope>  
+    </dependency>
+  </dependencies>  
+
+<plugins> ile build aşamasında kullanılacak pluginleri belirleyebilmekteyiz.
+       <plugins>
+    <plugin>
+    <artifactId>maven-deploy-plugin</artifactId>
+    <version>2.8.2</version>
+    <executions>
+      <execution>
+        <id>default-deploy</id>
+        <phase>deploy</phase>
+        <goals>
+          <goal>deploy</goal>
+        </goals>
+      </execution>
+    </executions>
+    </plugin>
+        </plugins>
+        
+Pluginler biz veya başka kişiler tarafında geliştirilmiş, build aşamalarında görev alabilen kütüphanelerdir. Pluginler bir veya birden fazla goal(bir build aşamasında çalıştırılmak üzere geliştirilmiş sınıflar)'e sahiptir.
+
+İşin önemli kısmına gelirsek build süreci tam olarak şu şekild eişlemektedir.
+
+Bir plugin bir goal'ünü pom.xml'deki plugins tagini kullanarak kendisini bir build phase'e de çalışmak üzere kaydetmektedir. Bunu exceutions tagleri ile yapmaktayız.
+  <plugin>
+    <artifactId>maven-deploy-plugin</artifactId>
+    <version>2.8.2</version>
+    <executions>
+      <execution>
+        <id>default-deploy</id>
+        <phase>deploy</phase>
+        <goals>
+          <goal>deploy</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
+  
+Burada önce maven-deploy-pluginin artifact olarak belirtip indirilmesini sağlamaktayız. Daha sonra executions kısmında bu pluginde bulunan deploy adındaki goalü deploy fazında çalışmak üzere kaydımızı yapıyoruz.
+
+Dikkat edin lifecycle ile ilgili bir bilgi yok. Maven phase isminden lifecycle'i bulabilmektedir. Her lifecycle unique phase isimlerine sahiptir.  
+
+Ve biz build başlattıgımız uygun phase'de maven pluginin goal'ünü işletmektedir.
+
+maven.apache.org 
+
+Peki biz build sürecini nasıl başlatmaktayız. Bunun iki yöntemi vardır arkadaşlar.
+1 - Phase ismi vererek çalıştırmak
+    Eclipse'de maven build dedikten sonra goals kısmına(golas yazdıgına bakmayın!!) direk olarak bir phase ismi verebiliriz, bu durumda maven phase isminde uygun lifecycle'i bulup 
+    o lifecycle'da yazdıgımız phase'e kadar olan tüm phaseleri çalıştırır.
+    
+    install yazdık mesela, install default lifecycle'in bir phase'idir, o zaman default lifecycle'da install'a kadar olan tüm fazlar işletilir.
+      process-resources
+  compile
+  process-test-resources
+  test-compile
+  test
+  package
+  install
+    clean yazdık mesela, clean phase'i clean lifecycle'inda bir phase'dir(isim karmamşısına düşmeyin lütfen, clean phase'i clean lifecycle isimleri aynı maalesef), eğer celan       
+    yazarsak
+    pre-clean
+    clean
+    şeklinde clean lifecycle'inda cleane kadar olan phaseler çalıştırlacaktır.
+    
+2 - Direk olarak plugin ve goal ismi vererek çalıştırmak
+   İkinci yöntem olarak direk plugin:goal şeklinde bir pluginin içindeki goalü direk çalıştırabiliriz. Burada öncekiler veya sonrakiler çalışmaz sadece o goal çalışacaktır.
+     <plugin>
+    <artifactId>maven-deploy-plugin</artifactId>
+    <version>2.8.2</version>
+    <executions>
+      <execution>
+        <id>default-deploy</id>
+        <phase>deploy</phase>
+        <goals>
+          <goal>deploy</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
+  mesela bu plugini hiç pom.xml'e eklemeden direk olarak'ta
+  deploy:deploy şeklinde çalıştırabiliriz. İlk plugin artifactId'de maven ve plugin kısımları çıkarınca kalan plugin ismidir. sağ tarafta goal ismidir zaten.
+  
+  
+Maven'da <properties> taginin içine propertyler tanımlayabilmekteyiz.
+
+<properties>
+  <mysql.version>3.14</mysql.version>
+</properties>  
+
+Bu property'i pom.xml'in devamında ${mysql.version} şeklinde refere ederek kullanabilmekteyiz.
+
+Maven'da <developers> tagi kullanarak pom.xml'e projeyi geliştirenlere dair bilgiler ekleyebilmekteyiz.
+  <developers>
+    <developer>
+      <name>Abdullah</name>
+    </developer>
+  </developers>
+  
+Maven'da plugin eğer parametre kabul ediyor ise <configuration> tagini kullanarak parametre geçirebilmekteyiz plugine.
+
+    <execution>
+      <id>default-deploy</id>
+      <phase>deploy</phase>
+      <goals>
+        <goal>deploy</goal>
+      </goals>
+      <configuration>
+        <parameterName>parameterValue</parameterName>
+      </configuration>
+    </execution>

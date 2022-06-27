@@ -1,0 +1,9 @@
+Project info : org.example.CustomPlugin.1.0-SNAPSHOT
+Developers :Release Date : null
+Dependecies 
+Dependency : org.apache.maven.maven-plugin-api
+Dependency : org.apache.maven.plugin-tools.maven-plugin-annotations
+Dependency : org.apache.maven.maven-core
+Dependency : junit.junit
+Plugins
+Plugin : maven-clean-pluginPlugin : maven-resources-pluginPlugin : maven-jar-pluginPlugin : maven-plugin-pluginPlugin : maven-compiler-pluginPlugin : maven-surefire-pluginPlugin : maven-install-pluginPlugin : maven-deploy-pluginPlugin : maven-site-plugin
